@@ -1,0 +1,6 @@
+{
+  "name": "LexaDesk 办公智译",
+  "description": "专为职场打造的极简浅色智能翻译与润色工作台，支持零散中文意图整理翻译、中英混杂与纯英润色、多场景与用词分档、对比高亮、意图防捏造核验、专属词汇表及快捷键悬浮球模式。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
