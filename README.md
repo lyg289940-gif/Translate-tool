@@ -97,3 +97,16 @@ npm run build
 # 启动生产服务
 npm start
 ```
+
+---
+
+## Netlify 部署说明
+
+项目已内置 `netlify.toml` 与 `netlify/functions/` 无服务器函数（将 `/api/*` 自动代理至 Netlify Functions），支持直接部署至 Netlify：
+
+1. 将代码推送至 Git 仓库并在 Netlify 关联部署（构建命令 `npm run build`，发布目录 `dist`，函数目录 `netlify/functions` 已在 `netlify.toml` 中配置）。
+2. 在 Netlify 控制台打开 **Site configuration → Environment variables**，添加环境变量：
+   - Key: `GEMINI_API_KEY`
+   - Value: 您的 Gemini API 密钥
+3. 修改或首次添加环境变量后，点击 **Deploys → Trigger deploy** 重新构建部署即可生效。
+

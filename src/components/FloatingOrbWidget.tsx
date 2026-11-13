@@ -18,6 +18,7 @@ import {
   TranslationResult,
   VocabularyTier,
 } from '../types/translation';
+import { postTranslate } from '../utils/api';
 
 interface FloatingOrbWidgetProps {
   visible: boolean;
@@ -155,23 +156,14 @@ export const FloatingOrbWidget: React.FC<FloatingOrbWidgetProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sourceText: text,
-          mode,
-          scenario,
-          vocabularyTier,
-          preferences,
-          glossary,
-        }),
+      const parsed = await postTranslate({
+        sourceText: text,
+        mode,
+        scenario,
+        vocabularyTier,
+        preferences,
+        glossary,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || '翻译服务暂时不可用');
-      }
-      const parsed = data as TranslationResult;
       setQuickResult(parsed);
       onRecordHistory(text, mode, scenario, vocabularyTier, parsed);
     } catch (err) {
@@ -274,8 +266,21 @@ export const FloatingOrbWidget: React.FC<FloatingOrbWidgetProps> = ({
               glossary,
             }),
           });
-          const data = await resp.json();
-          if (!resp.ok) throw new Error(data.error || '转换失败');
+          const rawText = await resp.text();
+          let data: { polishedText?: string; error?: string } | null = null;
+          if (rawText.trim()) {
+            try {
+              data = JSON.parse(rawText);
+            } catch {
+              data = null;
+            }
+          }
+          if (!resp.ok) {
+            throw new Error(data?.error || `转换失败（HTTP ${resp.status}）`);
+          }
+          if (!data?.polishedText) {
+            throw new Error('服务器返回空响应，请检查 /api/translate 与环境变量配置');
+          }
           outputEl.textContent = data.polishedText;
         } catch (err) {
           outputEl.textContent = err instanceof Error ? err.message : '转换失败';

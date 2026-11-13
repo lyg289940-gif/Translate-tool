@@ -33,6 +33,7 @@ import {
   saveTemplates,
   saveWorkspaceState,
 } from './utils/storage';
+import { postTranslate } from './utils/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('workbench');
@@ -144,25 +145,14 @@ export default function App() {
       setError(null);
 
       try {
-        const response = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sourceText: text,
-            mode,
-            scenario,
-            vocabularyTier: tierToUse,
-            preferences: activePreferences,
-            glossary,
-          }),
+        const parsed = await postTranslate({
+          sourceText: text,
+          mode,
+          scenario,
+          vocabularyTier: tierToUse,
+          preferences: activePreferences,
+          glossary,
         });
-
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || '翻译润色服务请求失败');
-        }
-
-        const parsed = data as TranslationResult;
         setResult(parsed);
         const newHistId = recordHistoryItem(text, mode, scenario, tierToUse, parsed);
         setCurrentHistoryId(newHistId);
